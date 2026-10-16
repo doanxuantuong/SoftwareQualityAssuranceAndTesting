@@ -1,24 +1,25 @@
+
 import { test, expect } from '@playwright/test';
 
 test('TC-SEARCH-001 - Tìm kiếm chuyến xe', async ({ page }) => {
-  // Bước 1: Mở website
+  // 1. Mở website
   await page.goto('https://vexere.com/');
 
-  // Bước 2: Đóng hộp thoại nếu nút đóng thực sự xuất hiện
+  // 2. Đóng hộp thoại nếu xuất hiện
   const closeButton = page.getByRole('button', { name: 'close' });
 
   if (await closeButton.isVisible().catch(() => false)) {
     await closeButton.click();
   }
 
-  // Bước 3: Chọn điểm đi
+  // 3. Chọn điểm đi
   await page.getByText('Nơi xuất phát').click();
   await page.getByTestId('SearchWidget.from').click();
   await page.getByRole('paragraph')
     .filter({ hasText: /^Hồ Chí Minh$/ })
     .click();
 
-  // Bước 4: Chọn điểm đến
+  // 4. Chọn điểm đến
   await page.getByText('Nơi đến').click();
   await page.getByTestId('SearchWidget.to').click();
   await page.locator('div')
@@ -26,7 +27,7 @@ test('TC-SEARCH-001 - Tìm kiếm chuyến xe', async ({ page }) => {
     .first()
     .click();
 
-  // Bước 5: Chọn ngày đi
+  // 5. Chọn ngày đi
   await page.locator('div')
     .filter({ hasText: /^Ngày đi$/ })
     .nth(2)
@@ -34,16 +35,33 @@ test('TC-SEARCH-001 - Tìm kiếm chuyến xe', async ({ page }) => {
 
   await page.getByText('25').nth(1).click();
 
-  // Bước 6: Nhấn tìm kiếm
+  // 6. Tìm kiếm
   await page.getByTestId('SearchWidget.search').click();
 
-  // Bước 7: Ghi nhận kết quả để kiểm tra
-  await page.waitForLoadState('domcontentloaded').catch(() => {});
+  // 7. Đợi điều hướng và ghi nhận URL
+  await page.waitForURL(
+    /ve-xe-khach-tu-ho-chi-minh-di-ba-ria-vung-tau-viet-nam/,
+    { timeout: 30000 }
+  );
 
   console.log('URL sau tìm kiếm:', page.url());
 
+  // 8. ASSERTION: kiểm tra tuyến xe
+  await expect(page).toHaveURL(
+    /ve-xe-khach-tu-ho-chi-minh-di-ba-ria-vung-tau-viet-nam/
+  );
+
+  // 9. ASSERTION: kiểm tra ngày đi
+  await expect(page).toHaveURL(/date=25-10-2026/);
+
+  // 10. ASSERTION: trang kết quả có nội dung
+  await expect(page.locator('body')).not.toBeEmpty();
+
+  // 11. Lưu ảnh bằng chứng
   await page.screenshot({
-    path: 'test-results/TC-SEARCH-001.png',
-    fullPage: true,
-  });
+  path: 'test-results/TC-SEARCH-001.png',
+  fullPage: false,
+  animations: 'disabled',
+  timeout: 60000,
+});
 });

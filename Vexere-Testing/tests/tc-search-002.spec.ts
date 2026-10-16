@@ -3,7 +3,10 @@ import { test, expect } from '@playwright/test';
 
 test('TC-SEARCH-002 - Hiển thị chức năng tìm kiếm', async ({ page }) => {
   // Mở website
-  await page.goto('https://vexere.com/');
+ await page.goto('https://vexere.com/', {
+  waitUntil: 'domcontentloaded',
+  timeout: 60000,
+});
 
   // Kiểm tra website đã tải
   await expect(page).toHaveURL(/vexere\.com/);
